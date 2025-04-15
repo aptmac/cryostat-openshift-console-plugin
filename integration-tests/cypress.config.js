@@ -1,26 +1,37 @@
-const { defineConfig } = require('cypress');
+const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
   viewportWidth: 1920,
   viewportHeight: 1080,
-  screenshotsFolder: './screenshots',
-  videosFolder: './videos',
+  screenshotsFolder: "./screenshots",
+  videosFolder: "./videos",
   video: true,
-  reporter: '../../node_modules/cypress-multi-reporters',
+  reporter: "../../node_modules/cypress-multi-reporters",
+
   reporterOptions: {
-    configFile: 'reporter-config.json',
+    configFile: "reporter-config.json",
   },
-  fixturesFolder: 'fixtures',
+
+  fixturesFolder: "fixtures",
   defaultCommandTimeout: 30000,
+
   retries: {
     runMode: 1,
     openMode: 0,
   },
+
   e2e: {
     setupNodeEvents(on, config) {
-      return require('./plugins/index.ts')(on, config);
+      return require("./plugins/index.ts")(on, config);
     },
-    specPattern: 'tests/**/*.cy.{js,jsx,ts,tsx}',
-    supportFile: 'support/index.ts',
+    specPattern: "tests/**/*.cy.{js,jsx,ts,tsx}",
+    supportFile: "support/index.ts",
+  },
+
+  component: {
+    devServer: {
+      framework: "react",
+      bundler: "webpack",
+    },
   },
 });
