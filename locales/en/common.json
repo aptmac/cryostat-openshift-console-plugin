@@ -1,9 +1,13 @@
 {
-  "DISABLE": "DISABLE",
-  "HOUR": "HOUR",
-  "HOUR_plural": "HOUR",
-  "MINUTE": "MINUTE",
-  "MINUTE_plural": "MINUTE",
-  "SECOND": "SECOND",
-  "SECOND_plural": "SECOND"
+  "Cryostat": "Cryostat",
+  "Navigation.Plugin_Example": "Plugin Example",
+  "Navigation.About": "About",
+  "Navigation.Settings": "Settings",
+  "Navigation.Dashboard": "Dashboard",
+  "Navigation.Topology": "Topology",
+  "Navigation.Automated_Rules": "Automated Rules",
+  "Navigation.Recordings": "Recordings",
+  "Navigation.Archives": "Archives",
+  "Navigation.Events": "Events",
+  "Navigation.Security": "Security"
 }

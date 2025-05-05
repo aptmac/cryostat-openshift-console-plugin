@@ -106,8 +106,9 @@ export default function CryostatSelector({
   return (
     <NamespaceBar>
       <Split hasGutter>
-        <SplitItem>
+        <SplitItem aria-label="cryostat-selector">
           <Select
+            aria-label="cryostat-selector-dropdown"
             isOpen={dropdownOpen}
             selected={selector}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

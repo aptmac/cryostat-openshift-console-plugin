@@ -26,6 +26,21 @@ module.exports = defineConfig({
     },
     specPattern: "tests/**/*.cy.{js,jsx,ts,tsx}",
     supportFile: "support/index.ts",
+    testIsolation: false,
+  },
+
+  component: {
+    devServer: {
+      framework: "react",
+      bundler: "webpack",
+    },
+  },
+
+  component: {
+    devServer: {
+      framework: "react",
+      bundler: "webpack",
+    },
   },
 
   component: {

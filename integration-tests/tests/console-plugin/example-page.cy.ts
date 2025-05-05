@@ -1,8 +1,27 @@
-import { checkErrors } from '../support';
+import { checkErrors } from '../../support';
 
 const PLUGIN_TEMPLATE_NAME = 'cryostat-openshift-console-plugin';
 const PLUGIN_TEMPLATE_PULL_SPEC = Cypress.env('PLUGIN_TEMPLATE_PULL_SPEC');
 export const isLocalDevEnvironment = Cypress.config('baseUrl').includes('localhost');
+
+const startOpenShift = (path: string) => {
+  // first check to see if there is already an instance of OpenShift running, and if so, skip
+  // run ./crc start and wait for it to complete
+};
+
+const stopOpenShift = (path: string) => {
+  // run ./crc stop
+};
+
+const startConsole = (path: string) => {
+  // first check to see if the console is running on port 9000, and if so, skip the next step and continue with tests
+  // cd to base directory of project, and run `yarn run start-console` on a different thread
+};
+
+const startDevPlugin = (path: string) => {
+  // first check to see if anything is running on port 9001, and if so, skip the next step and continue with tests
+  // cd to base directory of project, and run `yarn run start` on a different thread
+};
 
 const installHelmChart = (path: string) => {
   cy.exec(
@@ -54,8 +73,12 @@ describe('Console plugin template test', () => {
     // }
   });
 
+  beforeEach(() => {
+    cy.reload();
+  });
+
   afterEach(() => {
-    // checkErrors();
+    checkErrors();
   });
 
   after(() => {
@@ -67,30 +90,38 @@ describe('Console plugin template test', () => {
     cy.logout();
   });
 
-  // currently expects:
-  // - cryostat operator to be installed
-  // - cryostat project/instance to be configured and available
-  // - at least one target to exist in the cryostat project
+  it('should visit each page without errors', () => {
+    const pages = ['About', 'Dashboard', 'Topology', 'Automated Rules', 'Archives', 'Events', 'Security'];
+    cy.contains('[class="pf-v5-c-nav__link"]', 'Cryostat').click();
+    pages.forEach((page) => {
+      cy.get('[class="pf-v5-c-nav__link"]').get('[href^="/cryostat"]').contains(page).click();
+      checkErrors();
+    });
+  });
+
   it('should check out the dashboard', () => {
     cy.contains('[class="pf-v5-c-nav__link"]', 'Cryostat').click();
-    cy.get('[data-test="nav"]').contains('Navigation.Dashboard').click(); // todo: fix i18n within the test runs
+    cy.get('[data-test="nav"]').contains('Dashboard').click();
     cy.url().should('include', '/cryostat');
 
     // select the first Cryostat instance, and first target available
-    cy.get('button[class="pf-v5-c-menu-toggle"]').click();
-    cy.get('button[tabindex="0"]').click();
-    cy.get('button[aria-label="Select Target"]').click();
-    cy.get('button[tabindex="0"').click();
+    cy.get('div[aria-label="cryostat-selector"]').find('button').click();
+    cy.get('div[aria-label="cryostat-selector-dropdown"]').find('button[tabindex="0"]').click();
+
+    // select the first Cryostat target available
+    cy.get('button[aria-label="Select Target"').find('[class="pf-v5-c-menu-toggle__text"]').click();
+    cy.get('button[tabindex="0"').find('span[class=pf-v5-c-menu__item-text').click();
 
     // fetch the first chart axis label, wait 11s, and then compare the new value to the initial one to check for an update
     // however, there is a chance it updates to the same value, so should also check to make sure that it's not the initial 5.0e-11 value
     cy.get('text[id="chart-axis-1-ChartLabel-0"]')
       .find('tspan')
       .first()
-      .then(($span) => {
-        let value1 = $span.text();
-        cy.wait(11000);
-        cy.get('text[id="chart-axis-1-ChartLabel-0"]').find('tspan').first().should('not.contain.text', value1);
+      .then((span) => {
+        const initialValue = span.text();
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(11000); // charts update every 10 seconds
+        cy.get('text[id="chart-axis-1-ChartLabel-0"]').find('tspan').first().should('not.contain.text', initialValue);
       });
   });
 
