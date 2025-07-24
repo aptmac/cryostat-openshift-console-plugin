@@ -46,6 +46,9 @@
     "@cypress/webpack-preprocessor": "^5.15.5",
     "@openshift-console/dynamic-plugin-sdk": "1.4.0",
     "@openshift-console/dynamic-plugin-sdk-webpack": "1.1.1",
+    "@openshift/dynamic-plugin-sdk": "5.0.1",
+    "@openshift/dynamic-plugin-sdk-extensions": "1.4.1",
+    "@openshift/dynamic-plugin-sdk-utils": "5.0.1",
     "@patternfly/patternfly": "^5.4.0",
     "@patternfly/quickstarts": "^5.4.0",
     "@patternfly/react-catalog-view-extension": "^5.0.0",
@@ -55,6 +58,7 @@
     "@patternfly/react-styles": "^5.4.1",
     "@patternfly/react-table": "^5.4.8",
     "@patternfly/react-topology": "^5.4.0",
+    "@patternfly/react-virtualized-extension": "^5.0.0",
     "@reduxjs/toolkit": "^1.9.3",
     "@stoplight/prism-cli": "^5.12.0",
     "@types/node": "^22.10.5",
@@ -125,7 +129,8 @@
       "ArchivesPage": "./openshift/pages/ArchivesPage",
       "EventsPage": "./openshift/pages/EventsPage",
       "InstrumentationPage": "./openshift/pages/InstrumentationPage",
-      "SecurityPage": "./openshift/pages/SecurityPage"
+      "SecurityPage": "./openshift/pages/SecurityPage",
+      "CryostatActionProvider": "./openshift/actions/CryostatActionProvider"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
