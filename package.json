@@ -130,7 +130,7 @@
       "EventsPage": "./openshift/pages/EventsPage",
       "InstrumentationPage": "./openshift/pages/InstrumentationPage",
       "SecurityPage": "./openshift/pages/SecurityPage",
-      "CryostatActionProvider": "./openshift/actions/CryostatActionProvider"
+      "DeploymentLabelActionProvider": "./openshift/actions/DeploymentLabelActionProvider"
     },
     "dependencies": {
       "@console/pluginAPI": "*"

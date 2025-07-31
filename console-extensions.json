@@ -226,7 +226,7 @@
         "kind": "Deployment"
       },
       "provider": {
-        "$codeRef": "CryostatActionProvider"
+        "$codeRef": "DeploymentLabelActionProvider"
       }
     }
   }
