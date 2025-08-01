@@ -10,5 +10,6 @@
   "Navigation.Events": "Events",
   "Navigation.Instrumentation": "Instrumentation",
   "Navigation.Security": "Security",
-  "Navigation.About": "About"
+  "Navigation.About": "About",
+  "CRYOSTAT_DEPLOYMENT_ACTION": "Cryostat Action POC"
 }
