@@ -1,6 +1,12 @@
 import React from 'react';
-import { Modal, Button } from '@patternfly/react-core';
-import { K8sModel, K8sResourceKind, Patch } from '@openshift-console/dynamic-plugin-sdk';
+import { Modal, Button, Stack } from '@patternfly/react-core';
+import {
+  K8sModel,
+  K8sResourceCommon,
+  K8sResourceKind,
+  Patch,
+  useK8sWatchResource,
+} from '@openshift-console/dynamic-plugin-sdk';
 import { isUtilsConfigSet, k8sPatchResource, setUtilsConfig } from '@openshift/dynamic-plugin-sdk-utils';
 import { CryostatPluginUtilsConfig } from '@console-plugin/utils/CryostatPluginUtilsConfig';
 
@@ -12,17 +18,30 @@ interface CryostatModalProps {
 }
 
 export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
-  const submit = (e) => {
-    e.preventDefault();
+  const [instances] = useK8sWatchResource<K8sResourceCommon[]>({
+    isList: true,
+    namespaced: true,
+    namespace: undefined,
+    groupVersionKind: {
+      group: '',
+      kind: 'Service',
+      version: 'v1',
+    },
+    selector: {
+      matchLabels: {
+        'app.kubernetes.io/part-of': 'cryostat',
+        'app.kubernetes.io/component': 'cryostat',
+      },
+    },
+  });
+
+  function addLabels(instance: K8sResourceCommon) {
     if (!isUtilsConfigSet()) {
       setUtilsConfig(CryostatPluginUtilsConfig);
     }
-    // temp placeholders
-    const instanceName = 'name';
-    const instanceNamespace = 'namespace';
-    // todo - base should be just adding the new labels
-    // todo - handle un-registering from cryostat
-    // todo - handle updating -> changing from one cryostat to another
+    console.warn('hitting addLabels() with', instance);
+    const instanceName = instance.metadata?.name;
+    const instanceNamespace = instance.metadata?.namespace;
     const patch: Patch[] = [
       {
         op: 'add',
@@ -40,7 +59,8 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
       queryOptions: { name: resource.metadata?.name, ns: resource.metadata?.namespace },
       patches: patch,
     });
-  };
+  }
+
   return (
     <React.Fragment>
       <Modal
@@ -48,17 +68,22 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
         isOpen={true}
         onClose={closeModal}
         actions={[
-          <Button key="confirm" variant="primary" onClick={closeModal}>
-            Confirm
-          </Button>,
-          <Button key="cancel" variant="link" onClick={closeModal}>
-            Cancel
+          <Button key="exit" variant="primary" onClick={closeModal}>
+            Close
           </Button>,
         ]}
         ouiaId="CryostatModal"
       >
-        Hi there, I&apos;m a Cryostat Action Modal.
-        <Button onClick={submit}>Click me to add some labels..</Button>
+        <Stack>
+          {instances.map((i) => {
+            return (
+              <button
+                key={`button-${i.metadata?.uid}`}
+                onClick={() => addLabels(i)}
+              >{`${i.metadata?.name} (${i.metadata?.namespace})`}</button>
+            );
+          })}
+        </Stack>
       </Modal>
     </React.Fragment>
   );
