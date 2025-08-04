@@ -41,7 +41,7 @@ class CryostatControllerComponent extends React.Component<CryostatControllerProp
     await this.getCryostatConfig();
     this.applyUIDefaults();
     this.setDocLayout();
-    this.setState({ loaded: true });    
+    this.setState({ loaded: true });
   };
 
   private getCryostatConfig = async (): Promise<void> => {
