@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, Button, Stack } from '@patternfly/react-core';
+import { CryostatPluginUtilsConfig } from '@console-plugin/utils/CryostatPluginUtilsConfig';
+import { isUtilsConfigSet, k8sPatchResource, setUtilsConfig } from '@openshift/dynamic-plugin-sdk-utils';
 import {
   K8sModel,
   K8sResourceCommon,
@@ -7,8 +7,8 @@ import {
   Patch,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { isUtilsConfigSet, k8sPatchResource, setUtilsConfig } from '@openshift/dynamic-plugin-sdk-utils';
-import { CryostatPluginUtilsConfig } from '@console-plugin/utils/CryostatPluginUtilsConfig';
+import { Modal, Button, Stack } from '@patternfly/react-core';
+import React from 'react';
 
 interface CryostatModalProps {
   kind: K8sModel;
@@ -44,16 +44,43 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     const instanceNamespace = instance.metadata?.namespace;
     const patch: Patch[] = [
       {
-        op: 'add',
-        path: '/metadata/labels',
-        value: {
-          'cryostat.io/name': instanceName,
-          'cryostat.io/namespace': instanceNamespace,
-        },
+        op: 'replace',
+        path: '/spec/template/metadata/labels/cryostat.io~1name',
+        value: instanceName
+      },
+      {
+        op: 'replace',
+        path: '/spec/template/metadata/labels/cryostat.io~1namespace',
+        value: instanceNamespace
+      },
+    ];
+    console.warn('kind', kind);
+    console.warn('resource', resource);
+    k8sPatchResource({
+      // @ts-ignore
+      model: kind,
+      queryOptions: { name: resource.metadata?.name, ns: resource.metadata?.namespace },
+      patches: patch,
+    });
+  }
+
+  function removeLabels() {
+       if (!isUtilsConfigSet()) {
+      setUtilsConfig(CryostatPluginUtilsConfig);
+    }
+    const patch: Patch[] = [
+      {
+        op: 'replace',
+        path: '/spec/template/metadata/labels/cryostat.io~1name',
+        value: undefined
+      },
+      {
+        op: 'replace',
+        path: '/spec/template/metadata/labels/cryostat.io~1namespace',
+        value: undefined
       },
     ];
     k8sPatchResource({
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       model: kind,
       queryOptions: { name: resource.metadata?.name, ns: resource.metadata?.namespace },
@@ -83,6 +110,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
               >{`${i.metadata?.name} (${i.metadata?.namespace})`}</button>
             );
           })}
+          <button key={`button-remove-labels`} onClick={() => removeLabels()}>Remove Labels</button>
         </Stack>
       </Modal>
     </React.Fragment>

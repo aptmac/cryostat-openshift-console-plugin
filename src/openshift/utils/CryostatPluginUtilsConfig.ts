@@ -1,5 +1,5 @@
-import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
 import { UtilsConfig, WebSocketOptions, WebSocketAppSettings } from '@openshift/dynamic-plugin-sdk-utils';
+import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
 import * as _ from 'lodash';
 
 export const CryostatPluginUtilsConfig: UtilsConfig = {
@@ -85,7 +85,6 @@ const validateStatus = async (response: Response) => {
     if (!reason) {
       reason = response.statusText;
     }
-
     throw new Error(reason);
   });
 };
