@@ -7,7 +7,7 @@ import {
   Patch,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { Modal, Button, Stack } from '@patternfly/react-core';
+import { Modal, Button, Stack, ModalVariant } from '@patternfly/react-core';
 import React from 'react';
 
 interface CryostatModalProps {
@@ -39,7 +39,6 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     if (!isUtilsConfigSet()) {
       setUtilsConfig(CryostatPluginUtilsConfig);
     }
-    console.warn('hitting addLabels() with', instance);
     const instanceName = instance.metadata?.name;
     const instanceNamespace = instance.metadata?.namespace;
     const patch: Patch[] = [
@@ -54,8 +53,6 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
         value: instanceNamespace
       },
     ];
-    console.warn('kind', kind);
-    console.warn('resource', resource);
     k8sPatchResource({
       // @ts-ignore
       model: kind,
@@ -91,13 +88,17 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
   return (
     <React.Fragment>
       <Modal
-        title="Cryostat Action"
+        variant={ModalVariant.small}
+        title="Register with Cryostat"
         isOpen={true}
         onClose={closeModal}
         actions={[
-          <Button key="exit" variant="primary" onClick={closeModal}>
-            Close
+          <Button key="confirm" variant="primary" onClick={closeModal}>
+            Confirm
           </Button>,
+          <Button key="cancel" variant="secondary" onClick={closeModal}>
+            Cancel
+          </Button>
         ]}
         ouiaId="CryostatModal"
       >
@@ -110,7 +111,6 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
               >{`${i.metadata?.name} (${i.metadata?.namespace})`}</button>
             );
           })}
-          <button key={`button-remove-labels`} onClick={() => removeLabels()}>Remove Labels</button>
         </Stack>
       </Modal>
     </React.Fragment>

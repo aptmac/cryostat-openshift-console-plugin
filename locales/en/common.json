@@ -11,5 +11,5 @@
   "Navigation.Instrumentation": "Instrumentation",
   "Navigation.Security": "Security",
   "Navigation.About": "About",
-  "CRYOSTAT_DEPLOYMENT_ACTION": "Cryostat Action POC"
+  "CRYOSTAT_DEPLOYMENT_ACTION": "Register with Cryostat"
 }
