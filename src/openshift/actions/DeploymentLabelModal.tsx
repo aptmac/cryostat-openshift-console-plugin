@@ -7,7 +7,7 @@ import {
   Patch,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { Modal, Button, Stack, ModalVariant } from '@patternfly/react-core';
+import { Modal, Button, ModalVariant, FormSelect, FormGroup, Form, FormSelectOption, FormHelperText, HelperText, HelperTextItem } from '@patternfly/react-core';
 import React from 'react';
 
 interface CryostatModalProps {
@@ -18,6 +18,9 @@ interface CryostatModalProps {
 }
 
 export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
+  const [formSelectValue, setFormSelectValue] = React.useState('-1');
+  const [currentValue, setCurrentValue] = React.useState('');
+  const [helperText, setHelperText] = React.useState('')
   const [instances] = useK8sWatchResource<K8sResourceCommon[]>({
     isList: true,
     namespaced: true,
@@ -35,7 +38,22 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     },
   });
 
-  function addLabels(instance: K8sResourceCommon) {
+  React.useLayoutEffect(() => {
+    const deploymentLabels = resource.spec?.template.metadata.labels;
+    const name = deploymentLabels['cryostat.io/name'];
+    const namespace = deploymentLabels['cryostat.io/namespace'];
+    for (let i = 0; i < instances.length; i++) {
+      if (instances[i].metadata?.name === name && instances[i].metadata?.namespace === namespace) {
+        setFormSelectValue(i.toString());
+        setCurrentValue(i.toString());
+        return;
+      }
+    }
+    setCurrentValue('-1');
+  }, [resource, instances]);
+
+  function addLabels() {
+    const instance = instances[formSelectValue];
     if (!isUtilsConfigSet()) {
       setUtilsConfig(CryostatPluginUtilsConfig);
     }
@@ -62,7 +80,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
   }
 
   function removeLabels() {
-       if (!isUtilsConfigSet()) {
+    if (!isUtilsConfigSet()) {
       setUtilsConfig(CryostatPluginUtilsConfig);
     }
     const patch: Patch[] = [
@@ -85,6 +103,23 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     });
   }
 
+  function confirm() {
+    if (formSelectValue !== '-1') {
+      addLabels();
+    } else {
+      removeLabels();
+    }
+    closeModal();
+  }
+
+  const onChange = (_event: React.FormEvent<HTMLSelectElement>, value: string) => {
+    setFormSelectValue(value);
+    setHelperText('');
+    if (value !== currentValue) {
+      setHelperText('Deployment will be updated with new labels');
+    }
+  };
+
   return (
     <React.Fragment>
       <Modal
@@ -93,7 +128,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
         isOpen={true}
         onClose={closeModal}
         actions={[
-          <Button key="confirm" variant="primary" onClick={closeModal}>
+          <Button key="confirm" variant="primary" onClick={confirm}>
             Confirm
           </Button>,
           <Button key="cancel" variant="secondary" onClick={closeModal}>
@@ -102,16 +137,31 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
         ]}
         ouiaId="CryostatModal"
       >
-        <Stack>
-          {instances.map((i) => {
-            return (
-              <button
-                key={`button-${i.metadata?.uid}`}
-                onClick={() => addLabels(i)}
-              >{`${i.metadata?.name} (${i.metadata?.namespace})`}</button>
-            );
-          })}
-        </Stack>
+        <Form>
+          <FormGroup label="Select a Cryostat instance:" type="string" fieldId="selection">
+            <FormSelect
+              id="cryostat-selection"
+              value={formSelectValue}
+              onChange={onChange}
+              aria-label="Cryostat FormSelect Input">
+              <FormSelectOption key={'-1'} value={'-1'} label={'<No labels>'}/>
+              {instances.map((instance, index) => {
+                return (
+                  <FormSelectOption
+                    key={index}
+                    value={index}
+                    label={`${instance.metadata?.name} (ns: ${instance.metadata?.namespace})`}
+                  />
+                );
+              })}
+            </FormSelect>
+            <FormHelperText>
+              <HelperText>
+                <HelperTextItem>{helperText}</HelperTextItem>
+              </HelperText>
+            </FormHelperText>
+          </FormGroup>
+        </Form>
       </Modal>
     </React.Fragment>
   );

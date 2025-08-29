@@ -1,4 +1,4 @@
-import { UtilsConfig, WebSocketOptions, WebSocketAppSettings } from '@openshift/dynamic-plugin-sdk-utils';
+import { UtilsConfig, WebSocketAppSettings } from '@openshift/dynamic-plugin-sdk-utils';
 import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
 import * as _ from 'lodash';
 
@@ -22,10 +22,7 @@ export const CryostatPluginUtilsConfig: UtilsConfig = {
     const allOptions = _.defaultsDeep({}, initDefaults, options);
     return await fetch(url, allOptions).then((resp) => validateStatus(resp));
   },
-  wsAppSettings: function (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    options: WebSocketOptions & { wsPrefix?: string; pathPrefix?: string },
-  ): Promise<WebSocketAppSettings> {
+  wsAppSettings: function (): Promise<WebSocketAppSettings> {
     throw new Error('Function not implemented.');
   },
 };
