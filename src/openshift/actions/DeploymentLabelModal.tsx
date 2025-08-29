@@ -18,9 +18,10 @@ interface CryostatModalProps {
 }
 
 export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
-  const [formSelectValue, setFormSelectValue] = React.useState('-1');
   const [initialValue, setInitialValue] = React.useState('-1');
+  const [formSelectValue, setFormSelectValue] = React.useState('-1');
   const [helperText, setHelperText] = React.useState('');
+  const [validated, setValidated] = React.useState<ValidatedOptions>(ValidatedOptions.default);
   const [instances] = useK8sWatchResource<K8sResourceCommon[]>({
     isList: true,
     namespaced: true,
@@ -116,8 +117,10 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
   const onChange = (_event: React.FormEvent<HTMLSelectElement>, value: string) => {
     setFormSelectValue(value);
     setHelperText('');
+    setValidated(ValidatedOptions.default);
     if (value === initialValue) {
-      setHelperText('Deployment is already registered with this option');
+      setHelperText('Deployment is already registered with this Cryostat');
+      setValidated(ValidatedOptions.warning);
     }
   };
 
@@ -142,6 +145,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
           <FormGroup label="Select a Cryostat instance:" type="string" fieldId="selection">
             <FormSelect
               id="cryostat-selection"
+              validated={validated}
               value={formSelectValue}
               onChange={onChange}
               aria-label="Cryostat FormSelect Input">
@@ -158,7 +162,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
             </FormSelect>
             <FormHelperText>
               <HelperText>
-                <HelperTextItem>{helperText}</HelperTextItem>
+                <HelperTextItem variant={validated}>{helperText}</HelperTextItem>
               </HelperText>
             </FormHelperText>
           </FormGroup>
