@@ -1,4 +1,5 @@
 import { CryostatPluginUtilsConfig } from '@console-plugin/utils/CryostatPluginUtilsConfig';
+import { useCryostatTranslation } from '@i18n/i18nextUtil';
 import { isUtilsConfigSet, k8sPatchResource, setUtilsConfig } from '@openshift/dynamic-plugin-sdk-utils';
 import {
   K8sModel,
@@ -17,7 +18,8 @@ interface CryostatModalProps {
   closeModal: () => void;
 }
 
-export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
+export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
+  const { t } = useCryostatTranslation();
   const [initialValue, setInitialValue] = React.useState('-1');
   const [formSelectValue, setFormSelectValue] = React.useState('-1');
   const [helperText, setHelperText] = React.useState('');
@@ -50,25 +52,22 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
         return;
       }
     }
-  }, [resource, instances]);
+  }, [instances, resource]);
 
-  function addLabels() {
-    const instance = instances[formSelectValue];
+  function addMetadataLabels(instance: K8sResourceCommon) {
     if (!isUtilsConfigSet()) {
       setUtilsConfig(CryostatPluginUtilsConfig);
     }
-    const instanceName = instance.metadata?.name;
-    const instanceNamespace = instance.metadata?.namespace;
     const patch: Patch[] = [
       {
         op: 'replace',
         path: '/spec/template/metadata/labels/cryostat.io~1name',
-        value: instanceName
+        value: instance.metadata?.name
       },
       {
         op: 'replace',
         path: '/spec/template/metadata/labels/cryostat.io~1namespace',
-        value: instanceNamespace
+        value: instance.metadata?.namespace
       },
     ];
     k8sPatchResource({
@@ -79,7 +78,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     });
   }
 
-  function removeLabels() {
+  function removeMetadataLabels() {
     if (!isUtilsConfigSet()) {
       setUtilsConfig(CryostatPluginUtilsConfig);
     }
@@ -103,12 +102,12 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     });
   }
 
-  function confirm() {
+  function handleFormSubmit() {
     if (formSelectValue !== initialValue) {
       if (formSelectValue !== '-1') {
-        addLabels();
+        addMetadataLabels(instances[formSelectValue]);
       } else {
-        removeLabels();
+        removeMetadataLabels();
       }
     }
     closeModal();
@@ -119,7 +118,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     setHelperText('');
     setValidated(ValidatedOptions.default);
     if (value === initialValue) {
-      setHelperText('Deployment is already registered with this Cryostat');
+      setHelperText(t('DEPLOYMENT_ACTION_ALREADY_REGISTERED'));
       setValidated(ValidatedOptions.warning);
     }
   };
@@ -128,28 +127,28 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     <React.Fragment>
       <Modal
         variant={ModalVariant.small}
-        title={`Register ${resource.metadata?.name} with Cryostat`}
+        title={t('DEPLOYMENT_ACTION_TITLE')}
         isOpen={true}
         onClose={closeModal}
         actions={[
-          <Button key="confirm" variant="primary" onClick={confirm}>
-            Confirm
+          <Button key="submit" variant="primary" onClick={handleFormSubmit}>
+            {t('SUBMIT')}
           </Button>,
           <Button key="cancel" variant="secondary" onClick={closeModal}>
-            Cancel
+            {t('CANCEL')}
           </Button>
         ]}
-        ouiaId="CryostatModal"
+        ouiaId="CryostatDeploymentActionModal"
       >
         <Form>
-          <FormGroup label="Select a Cryostat instance:" type="string" fieldId="selection">
+          <FormGroup label={t('DEPLOYMENT_ACTION_SELECT_LABEL')} type="string" fieldId="selection">
             <FormSelect
               id="cryostat-selection"
               validated={validated}
               value={formSelectValue}
               onChange={onChange}
-              aria-label="Cryostat FormSelect Input">
-              <FormSelectOption key={'-1'} value={'-1'} label={'<No labels>'}/>
+              aria-label="Cryostat Deployment Action FormSelect Input">
+              <FormSelectOption key={'-1'} value={'-1'} label={t('DEPLOYMENT_ACTION_EMPTY_OPTION')}/>
               {instances.map((instance, index) => {
                 return (
                   <FormSelectOption
