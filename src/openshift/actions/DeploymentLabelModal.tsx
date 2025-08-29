@@ -7,7 +7,7 @@ import {
   Patch,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { Modal, Button, ModalVariant, FormSelect, FormGroup, Form, FormSelectOption, FormHelperText, HelperText, HelperTextItem } from '@patternfly/react-core';
+import { Modal, Button, ModalVariant, FormSelect, FormGroup, Form, FormSelectOption, FormHelperText, HelperText, HelperTextItem, ValidatedOptions } from '@patternfly/react-core';
 import React from 'react';
 
 interface CryostatModalProps {
@@ -19,8 +19,8 @@ interface CryostatModalProps {
 
 export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
   const [formSelectValue, setFormSelectValue] = React.useState('-1');
-  const [currentValue, setCurrentValue] = React.useState('');
-  const [helperText, setHelperText] = React.useState('')
+  const [initialValue, setInitialValue] = React.useState('-1');
+  const [helperText, setHelperText] = React.useState('');
   const [instances] = useK8sWatchResource<K8sResourceCommon[]>({
     isList: true,
     namespaced: true,
@@ -45,11 +45,10 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     for (let i = 0; i < instances.length; i++) {
       if (instances[i].metadata?.name === name && instances[i].metadata?.namespace === namespace) {
         setFormSelectValue(i.toString());
-        setCurrentValue(i.toString());
+        setInitialValue(i.toString());
         return;
       }
     }
-    setCurrentValue('-1');
   }, [resource, instances]);
 
   function addLabels() {
@@ -104,10 +103,12 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
   }
 
   function confirm() {
-    if (formSelectValue !== '-1') {
-      addLabels();
-    } else {
-      removeLabels();
+    if (formSelectValue !== initialValue) {
+      if (formSelectValue !== '-1') {
+        addLabels();
+      } else {
+        removeLabels();
+      }
     }
     closeModal();
   }
@@ -115,8 +116,8 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
   const onChange = (_event: React.FormEvent<HTMLSelectElement>, value: string) => {
     setFormSelectValue(value);
     setHelperText('');
-    if (value !== currentValue) {
-      setHelperText('Deployment will be updated with new labels');
+    if (value === initialValue) {
+      setHelperText('Deployment is already registered with this option');
     }
   };
 
@@ -124,7 +125,7 @@ export const DeploymentLabelModal: React.FC<CryostatModalProps> = ({ kind, resou
     <React.Fragment>
       <Modal
         variant={ModalVariant.small}
-        title="Register with Cryostat"
+        title={`Register ${resource.metadata?.name} with Cryostat`}
         isOpen={true}
         onClose={closeModal}
         actions={[
