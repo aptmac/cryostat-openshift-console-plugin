@@ -19,9 +19,10 @@ interface CryostatModalProps {
 }
 
 export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
+  const EMPTY_VALUE = '-1';
   const { t } = useCryostatTranslation();
-  const [initialValue, setInitialValue] = React.useState('-1');
-  const [formSelectValue, setFormSelectValue] = React.useState('-1');
+  const [initialValue, setInitialValue] = React.useState(EMPTY_VALUE);
+  const [formSelectValue, setFormSelectValue] = React.useState(EMPTY_VALUE);
   const [helperText, setHelperText] = React.useState('');
   const [validated, setValidated] = React.useState<ValidatedOptions>(ValidatedOptions.default);
   const [instances] = useK8sWatchResource<K8sResourceCommon[]>({
@@ -40,6 +41,7 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
       },
     },
   });
+  
 
   React.useLayoutEffect(() => {
     const deploymentLabels = resource.spec?.template.metadata.labels;
@@ -104,7 +106,7 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
 
   function handleFormSubmit() {
     if (formSelectValue !== initialValue) {
-      if (formSelectValue !== '-1') {
+      if (formSelectValue !== EMPTY_VALUE) {
         addMetadataLabels(instances[formSelectValue]);
       } else {
         removeMetadataLabels();
@@ -148,7 +150,7 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
               value={formSelectValue}
               onChange={onChange}
               aria-label="Cryostat Deployment Action FormSelect Input">
-              <FormSelectOption key={'-1'} value={'-1'} label={t('DEPLOYMENT_ACTION_EMPTY_OPTION')}/>
+              <FormSelectOption value={EMPTY_VALUE} label={t('DEPLOYMENT_ACTION_EMPTY_OPTION')}/>
               {instances.map((instance, index) => {
                 return (
                   <FormSelectOption
