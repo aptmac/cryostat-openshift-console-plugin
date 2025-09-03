@@ -8,7 +8,19 @@ import {
   Patch,
   useK8sWatchResource,
 } from '@openshift-console/dynamic-plugin-sdk';
-import { Modal, Button, ModalVariant, FormSelect, FormGroup, Form, FormSelectOption, FormHelperText, HelperText, HelperTextItem, ValidatedOptions } from '@patternfly/react-core';
+import {
+  Modal,
+  Button,
+  ModalVariant,
+  FormSelect,
+  FormGroup,
+  Form,
+  FormSelectOption,
+  FormHelperText,
+  HelperText,
+  HelperTextItem,
+  ValidatedOptions,
+} from '@patternfly/react-core';
 import React from 'react';
 
 interface CryostatModalProps {
@@ -41,7 +53,7 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
       },
     },
   });
-  
+
   React.useLayoutEffect(() => {
     const deploymentLabels = resource.spec?.template.metadata.labels;
     const name = deploymentLabels['cryostat.io/name'];
@@ -63,12 +75,12 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
       {
         op: 'replace',
         path: '/spec/template/metadata/labels/cryostat.io~1name',
-        value: instance.metadata?.name
+        value: instance.metadata?.name,
       },
       {
         op: 'replace',
         path: '/spec/template/metadata/labels/cryostat.io~1namespace',
-        value: instance.metadata?.namespace
+        value: instance.metadata?.namespace,
       },
     ];
     k8sPatchResource({
@@ -87,12 +99,12 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
       {
         op: 'replace',
         path: '/spec/template/metadata/labels/cryostat.io~1name',
-        value: undefined
+        value: undefined,
       },
       {
         op: 'replace',
         path: '/spec/template/metadata/labels/cryostat.io~1namespace',
-        value: undefined
+        value: undefined,
       },
     ];
     k8sPatchResource({
@@ -137,7 +149,7 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
           </Button>,
           <Button key="cancel" variant="secondary" onClick={closeModal}>
             {t('CANCEL')}
-          </Button>
+          </Button>,
         ]}
         ouiaId="CryostatDeploymentActionModal"
       >
@@ -148,8 +160,9 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
               validated={validated}
               value={formSelectValue}
               onChange={onChange}
-              aria-label="Cryostat Deployment Action FormSelect Input">
-              <FormSelectOption value={EMPTY_VALUE} label={t('DEPLOYMENT_ACTION_EMPTY_OPTION')}/>
+              aria-label="Cryostat Deployment Action FormSelect Input"
+            >
+              <FormSelectOption value={EMPTY_VALUE} label={t('DEPLOYMENT_ACTION_EMPTY_OPTION')} />
               {instances.map((instance, index) => {
                 return (
                   <FormSelectOption

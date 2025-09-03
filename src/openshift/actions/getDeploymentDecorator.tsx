@@ -4,15 +4,7 @@ import * as React from 'react';
 import DeploymentDecorator from './DeploymentDecorator';
 
 const getDeploymentDecorator: TopologyDecoratorGetter = (element: Node, radius: number, x: number, y: number) => {
-  return (
-    <DeploymentDecorator
-      key="cryostat-deployment"
-      element={element}
-      radius={radius}
-      x={x}
-      y={y}
-    />
-  );
+  return <DeploymentDecorator key="cryostat-deployment" element={element} radius={radius} x={x} y={y} />;
 };
 
 export default getDeploymentDecorator;
