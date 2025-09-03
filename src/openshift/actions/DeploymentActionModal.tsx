@@ -42,7 +42,6 @@ export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, reso
     },
   });
   
-
   React.useLayoutEffect(() => {
     const deploymentLabels = resource.spec?.template.metadata.labels;
     const name = deploymentLabels['cryostat.io/name'];

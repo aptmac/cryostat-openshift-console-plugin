@@ -247,5 +247,16 @@
         "$codeRef": "DeploymentActionProvider"
       }
     }
+  },
+  {
+    "type": "console.topology/decorator/provider",
+    "properties": {
+      "id": "cryostat-deployment-decorator",
+      "priority": 100,
+      "quadrant": "upperLeft",
+      "decorator": {
+        "$codeRef": "getDeploymentDecorator"
+      }
+    }
   }
 ]

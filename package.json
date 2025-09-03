@@ -133,7 +133,8 @@
       "EventsPage": "./openshift/pages/EventsPage",
       "InstrumentationPage": "./openshift/pages/InstrumentationPage",
       "SecurityPage": "./openshift/pages/SecurityPage",
-      "DeploymentActionProvider": "./openshift/actions/DeploymentActionProvider"
+      "DeploymentActionProvider": "./openshift/actions/DeploymentActionProvider",
+      "getDeploymentDecorator": "./openshift/actions/getDeploymentDecorator"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
