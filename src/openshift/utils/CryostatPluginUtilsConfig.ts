@@ -2,6 +2,7 @@ import { UtilsConfig, WebSocketAppSettings } from '@openshift/dynamic-plugin-sdk
 import { getCSRFToken } from '@openshift-console/dynamic-plugin-sdk/lib/utils/fetch/console-fetch-utils';
 import * as _ from 'lodash';
 
+// See: https://github.com/openshift/console/blob/main/frontend/public/co-fetch.ts
 export const CryostatPluginUtilsConfig: UtilsConfig = {
   appFetch: async function (url: string, options: RequestInit): Promise<Response> {
     url = `/api/kubernetes${url}`;
@@ -33,18 +34,12 @@ export const CryostatPluginUtilsConfig: UtilsConfig = {
  * See: https://github.com/openshift/console/blob/main/frontend/packages/console-dynamic-plugin-sdk/src/app/configSetup.ts
  */
 const validateStatus = async (response: Response) => {
-  console.warn('response:', response);
   if (response.ok) {
     return response;
   }
 
   if (response.status === 429) {
     throw new Error();
-  }
-
-  if (response.status === 401) {
-    // const next = window.location.pathname + window.location.search + window.location.hash;
-    console.warn('401');
   }
 
   const contentType = response.headers.get('content-type');
