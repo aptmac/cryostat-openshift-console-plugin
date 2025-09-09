@@ -30,7 +30,7 @@ interface CryostatModalProps {
   closeModal: () => void;
 }
 
-export const DeploymentActionModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
+export const DeploymentLabelActionModal: React.FC<CryostatModalProps> = ({ kind, resource, closeModal }) => {
   const EMPTY_VALUE = '-1';
   const { t } = useCryostatTranslation();
   const [initialValue, setInitialValue] = React.useState(EMPTY_VALUE);

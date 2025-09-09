@@ -1,9 +1,9 @@
 import { useCryostatTranslation } from '@i18n/i18nextUtil';
 import { Action, K8sResourceKind, useK8sModel, useModal } from '@openshift-console/dynamic-plugin-sdk';
 import * as React from 'react';
-import { DeploymentActionModal } from './DeploymentActionModal';
+import { DeploymentLabelActionModal } from './DeploymentLabelActionModal';
 
-const DeploymentActionProvider = (resource: K8sResourceKind) => {
+const DeploymentLabelActionProvider = (resource: K8sResourceKind) => {
   const [kindObj, inFlight] = useK8sModel({ group: 'apps', version: 'v1', kind: 'Deployment' });
   const { t } = useCryostatTranslation();
   const launcher = useModal();
@@ -13,7 +13,7 @@ const DeploymentActionProvider = (resource: K8sResourceKind) => {
         id: 'cryostat-deployment-action',
         label: t('DEPLOYMENT_ACTION_TITLE'),
         cta: () => {
-          launcher(DeploymentActionModal, { kind: kindObj, resource });
+          launcher(DeploymentLabelActionModal, { kind: kindObj, resource });
         },
       },
     ],
@@ -22,4 +22,4 @@ const DeploymentActionProvider = (resource: K8sResourceKind) => {
   return [actions, !inFlight, undefined];
 };
 
-export default DeploymentActionProvider;
+export default DeploymentLabelActionProvider;
