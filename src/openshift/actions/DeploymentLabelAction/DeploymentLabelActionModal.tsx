@@ -1,4 +1,5 @@
 import { CryostatPluginUtilsConfig } from '@console-plugin/utils/CryostatPluginUtilsConfig';
+import { cryostatInstanceResource } from '@console-plugin/utils/utils';
 import { useCryostatTranslation } from '@i18n/i18nextUtil';
 import { isUtilsConfigSet, k8sPatchResource, setUtilsConfig } from '@openshift/dynamic-plugin-sdk-utils';
 import {
@@ -37,22 +38,7 @@ export const DeploymentLabelActionModal: React.FC<CryostatModalProps> = ({ kind,
   const [formSelectValue, setFormSelectValue] = React.useState(EMPTY_VALUE);
   const [helperText, setHelperText] = React.useState('');
   const [validated, setValidated] = React.useState<ValidatedOptions>(ValidatedOptions.default);
-  const [instances] = useK8sWatchResource<K8sResourceCommon[]>({
-    isList: true,
-    namespaced: true,
-    namespace: undefined,
-    groupVersionKind: {
-      group: '',
-      kind: 'Service',
-      version: 'v1',
-    },
-    selector: {
-      matchLabels: {
-        'app.kubernetes.io/part-of': 'cryostat',
-        'app.kubernetes.io/component': 'cryostat',
-      },
-    },
-  });
+  const [instances] = useK8sWatchResource<K8sResourceCommon[]>(cryostatInstanceResource);
 
   React.useLayoutEffect(() => {
     const deploymentLabels = resource.spec?.template.metadata.labels;
@@ -67,10 +53,19 @@ export const DeploymentLabelActionModal: React.FC<CryostatModalProps> = ({ kind,
     }
   }, [instances, resource]);
 
-  function addMetadataLabels(instance: K8sResourceCommon) {
+  function patchResource(patch: Patch[]) {
     if (!isUtilsConfigSet()) {
       setUtilsConfig(CryostatPluginUtilsConfig);
     }
+    k8sPatchResource({
+      // @ts-ignore
+      model: kind,
+      queryOptions: { name: resource.metadata?.name, ns: resource.metadata?.namespace },
+      patches: patch,
+    });
+  }
+
+  function addMetadataLabels(instance: K8sResourceCommon) {
     const patch: Patch[] = [
       {
         op: 'replace',
@@ -83,36 +78,21 @@ export const DeploymentLabelActionModal: React.FC<CryostatModalProps> = ({ kind,
         value: instance.metadata?.namespace,
       },
     ];
-    k8sPatchResource({
-      // @ts-ignore
-      model: kind,
-      queryOptions: { name: resource.metadata?.name, ns: resource.metadata?.namespace },
-      patches: patch,
-    });
+    patchResource(patch);
   }
 
   function removeMetadataLabels() {
-    if (!isUtilsConfigSet()) {
-      setUtilsConfig(CryostatPluginUtilsConfig);
-    }
     const patch: Patch[] = [
       {
-        op: 'replace',
+        op: 'remove',
         path: '/spec/template/metadata/labels/cryostat.io~1name',
-        value: undefined,
       },
       {
-        op: 'replace',
+        op: 'remove',
         path: '/spec/template/metadata/labels/cryostat.io~1namespace',
-        value: undefined,
       },
     ];
-    k8sPatchResource({
-      // @ts-ignore
-      model: kind,
-      queryOptions: { name: resource.metadata?.name, ns: resource.metadata?.namespace },
-      patches: patch,
-    });
+    patchResource(patch);
   }
 
   function handleFormSubmit() {
