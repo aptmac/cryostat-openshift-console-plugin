@@ -35,14 +35,12 @@ export const DeploymentDecorator: React.FC<DeploymentDecoratorProps> = ({ elemen
   });
   const [routeModel] = useK8sModel({ group: 'route.openshift.io', version: 'v1', kind: 'Route' });
   const routeUrl = React.useRef('');
-  if (element['resourceKind'] && element['resourceKind'] === 'apps~v1~Deployment') {
+  if (element['resourceKind'] === 'apps~v1~Deployment') {
     const resource: K8sResourceKind = element['resource'];
     const labels = resource.spec?.template.metadata.labels;
     if (
       labels['cryostat.io/name'] &&
-      labels['cryostat.io/name'] !== '' &&
-      labels['cryostat.io/namespace'] &&
-      labels['cryostat.io/namespace'] !== ''
+      labels['cryostat.io/namespace']
     ) {
       for (let i = 0; i < instances.length; i++) {
         if (
@@ -83,7 +81,7 @@ export const DeploymentDecorator: React.FC<DeploymentDecoratorProps> = ({ elemen
             <circle class="pf-topology__node__decorator__bg" cx={x} cy={y} r={radius}></circle>
             <g transform={`translate(${x}, ${y})`}>
               <g transform="translate(-6.5, -6.5)">
-                <CryostatIcon class="svg-cryostat" width="1em" height="1em"></CryostatIcon>
+                <CryostatIcon width={`${radius}px`} height={`${radius}px`}></CryostatIcon>
               </g>
             </g>
           </g>

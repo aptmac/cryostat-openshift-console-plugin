@@ -1,6 +1,7 @@
 import * as React from 'react';
 const CryostatIcon = (props) => (
   <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" {...props}>
+    <title id="cryostat-icon-title">Open Cryostat</title>
     <defs>
       <style>{'.cls-1{fill:#fff;}.cls-2{fill:#1b4965;}.cls-3{fill:#95c9e9;}.cls-4{fill:#5fa8d3;}'}</style>
     </defs>

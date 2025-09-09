@@ -19,7 +19,7 @@ const DeploymentLabelActionProvider = (resource: K8sResourceKind) => {
     ],
     [kindObj, launcher, resource, t],
   );
-  return [actions, !inFlight, undefined];
+  return [actions, !inFlight];
 };
 
 export default DeploymentLabelActionProvider;
