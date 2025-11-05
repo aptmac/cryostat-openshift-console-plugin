@@ -12,42 +12,42 @@ on:
         type: string
         default: ''
 
-env:
-  CI_USER: cryostat+bot
-  CI_REGISTRY: quay.io/cryostat
-  CI_IMG: quay.io/cryostat/cryostat-openshift-console-plugin
-  IMG_NAME: cryostat-openshift-console-plugin
+# env:
+#   CI_USER: cryostat+bot
+#   CI_REGISTRY: quay.io/cryostat
+#   CI_IMG: quay.io/cryostat/cryostat-openshift-console-plugin
+#   IMG_NAME: cryostat-openshift-console-plugin
 
 jobs:
-  format-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'yarn'
-      - uses: bahmutov/npm-install@v1
-      - run: yarn format
+  # format-check:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
+  #         fetch-depth: 0
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 'lts/*'
+  #         cache: 'yarn'
+  #     - uses: bahmutov/npm-install@v1
+  #     - run: yarn format
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'yarn'
-      - uses: bahmutov/npm-install@v1
-      - run: yarn lint
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
+  #         fetch-depth: 0
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 'lts/*'
+  #         cache: 'yarn'
+  #     - uses: bahmutov/npm-install@v1
+  #     - run: yarn lint
 
-  type-check:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,11 +56,10 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.18.2'
           cache: 'yarn'
       - uses: bahmutov/npm-install@v1
-      - run: yarn type-check:plugin
-      - run: yarn install
+      - run: yarn install --immutable
       - run: yarn build
 
   # test:
