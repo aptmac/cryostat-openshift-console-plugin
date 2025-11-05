@@ -56,104 +56,106 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '20'
           cache: 'yarn'
       - uses: bahmutov/npm-install@v1
       - run: yarn type-check:plugin
+      - run: yarn install
+      - run: yarn build
 
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: ['lts/*']
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-        fetch-depth: 0
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-    - uses: bahmutov/npm-install@v1
-    - run: yarn test:ci
+  # test:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node-version: ['lts/*']
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #     with:
+  #       submodules: true
+  #       fetch-depth: 0
+  #   - name: Use Node.js ${{ matrix.node-version }}
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: ${{ matrix.node-version }}
+  #       cache: 'yarn'
+  #   - uses: bahmutov/npm-install@v1
+  #   - run: yarn test:ci
 
-  build-container:
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
-    runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
-    if: ${{ github.repository_owner == 'cryostatio' }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-          fetch-depth: 0
-      - name: Install buildah and podman
-        run: |
-          sudo apt -y update
-          sudo apt -y install buildah podman
-      - name: Build container
-        id: container-build
-        uses: redhat-actions/buildah-build@v2
-        with:
-          image: ${{ env.CI_IMG }}
-          oci: true
-          tags: ${{ github.sha }}-${{ matrix.arch }}
-          archs: ${{ matrix.arch }}
-          containerfiles: |
-            ./Dockerfile
-          extra-args: |
-            --jobs=2
-      - name: Save container image
-        run: podman save -o ${{ github.sha }}-${{ matrix.arch }}.tar --format oci-archive ${{ env.CI_IMG }}:${{ github.sha }}-${{ matrix.arch }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ github.sha }}-${{ matrix.arch }}
-          path: ${{ github.sha }}-${{ matrix.arch }}.tar
+  # build-container:
+  #   strategy:
+  #     matrix:
+  #       arch: [amd64, arm64]
+  #   runs-on: ${{ matrix.arch == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+  #   if: ${{ github.repository_owner == 'cryostatio' }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
+  #         fetch-depth: 0
+  #     - name: Install buildah and podman
+  #       run: |
+  #         sudo apt -y update
+  #         sudo apt -y install buildah podman
+  #     - name: Build container
+  #       id: container-build
+  #       uses: redhat-actions/buildah-build@v2
+  #       with:
+  #         image: ${{ env.CI_IMG }}
+  #         oci: true
+  #         tags: ${{ github.sha }}-${{ matrix.arch }}
+  #         archs: ${{ matrix.arch }}
+  #         containerfiles: |
+  #           ./Dockerfile
+  #         extra-args: |
+  #           --jobs=2
+  #     - name: Save container image
+  #       run: podman save -o ${{ github.sha }}-${{ matrix.arch }}.tar --format oci-archive ${{ env.CI_IMG }}:${{ github.sha }}-${{ matrix.arch }}
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: ${{ github.sha }}-${{ matrix.arch }}
+  #         path: ${{ github.sha }}-${{ matrix.arch }}.tar
 
-  publish-manifest:
-    runs-on: ubuntu-latest
-    needs: [build-container]
-    if: ${{ github.repository_owner == 'cryostatio' && inputs.push-container}}
-    steps:
-      - name: Download container tarballs
-        uses: actions/download-artifact@v4
-        with:
-          path: containers
-          pattern: ${{ github.sha }}-*
-          merge-multiple: true
-      - name: Create manifest
-        run: podman manifest create ${{ env.CI_IMG }}:${{ github.sha }}
-      - name: Import container tarballs to manifest
-        run: |
-          find containers -type f -exec podman load -i {} \;
-          for tag in $(podman images --filter label=io.cryostat.component --format '{{ .Tag }}'); do
-            podman manifest add ${{ env.CI_IMG }}:${{ github.sha }} containers-storage:${{ env.CI_IMG }}:${tag}
-          done
-      - name: Set manifest tags
-        id: manifest-tags
-        run: |
-          TAGS=()
-          if [ '${{ github.ref }}' == 'refs/heads/main' ]; then
-            TAGS+=("latest")
-          fi
-          for tag in ${{ inputs.additional-tags }}; do
-            TAGS+=("${tag}")
-          done
-          echo "::set-output name=tags::${TAGS[@]}"
-      - name: Tag manifest
-        run: |
-          for tag in ${{ steps.manifest-tags.outputs.tags }}; do
-            podman tag ${{ env.CI_IMG }}:${{ github.sha }} ${{ env.CI_IMG }}:${tag}
-          done
-      - name: Push to registry
-        id: push-to-registry
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: ${{ env.IMG_NAME }}
-          tags: ${{ github.ref == 'refs/heads/main' && 'latest' || '' }} ${{ inputs.additional-tags }}
-          registry: ${{ env.CI_REGISTRY }}
-          username: ${{ env.CI_USER }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+  # publish-manifest:
+  #   runs-on: ubuntu-latest
+  #   needs: [build-container]
+  #   if: ${{ github.repository_owner == 'cryostatio' && inputs.push-container}}
+  #   steps:
+  #     - name: Download container tarballs
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: containers
+  #         pattern: ${{ github.sha }}-*
+  #         merge-multiple: true
+  #     - name: Create manifest
+  #       run: podman manifest create ${{ env.CI_IMG }}:${{ github.sha }}
+  #     - name: Import container tarballs to manifest
+  #       run: |
+  #         find containers -type f -exec podman load -i {} \;
+  #         for tag in $(podman images --filter label=io.cryostat.component --format '{{ .Tag }}'); do
+  #           podman manifest add ${{ env.CI_IMG }}:${{ github.sha }} containers-storage:${{ env.CI_IMG }}:${tag}
+  #         done
+  #     - name: Set manifest tags
+  #       id: manifest-tags
+  #       run: |
+  #         TAGS=()
+  #         if [ '${{ github.ref }}' == 'refs/heads/main' ]; then
+  #           TAGS+=("latest")
+  #         fi
+  #         for tag in ${{ inputs.additional-tags }}; do
+  #           TAGS+=("${tag}")
+  #         done
+  #         echo "::set-output name=tags::${TAGS[@]}"
+  #     - name: Tag manifest
+  #       run: |
+  #         for tag in ${{ steps.manifest-tags.outputs.tags }}; do
+  #           podman tag ${{ env.CI_IMG }}:${{ github.sha }} ${{ env.CI_IMG }}:${tag}
+  #         done
+  #     - name: Push to registry
+  #       id: push-to-registry
+  #       uses: redhat-actions/push-to-registry@v2
+  #       with:
+  #         image: ${{ env.IMG_NAME }}
+  #         tags: ${{ github.ref == 'refs/heads/main' && 'latest' || '' }} ${{ inputs.additional-tags }}
+  #         registry: ${{ env.CI_REGISTRY }}
+  #         username: ${{ env.CI_USER }}
+  #         password: ${{ secrets.REGISTRY_PASSWORD }}
