@@ -60,7 +60,7 @@ jobs:
           cache: 'yarn'
       - uses: bahmutov/npm-install@v1
       - run: yarn install --immutable
-      - run: yarn build
+      - run: cp -f tsconfig-plugin.json tsconfig.json && yarn build
 
   # test:
   #   runs-on: ubuntu-latest
